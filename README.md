@@ -12,3 +12,5 @@ cargo run --  -c 3 -p 100000 -t 6 # this will cluster 100,000 points into 3 thre
 TODO: the calculation of the points' best clusters is done in parallel, but the point assignment and calculation of cluster centroids happens synchronously. 
 I could parallelize the set_centroid() method, and/or better yet have the assignment and centroid update happen as each point assignment is ready. 
 This would require the receiver end of the channel to not wait for the threads to be done. I am not sure how to do that with crossbeam atm.
+
+TODO: make it more rust idiomatic. find_best_cluster() in particular could probably be one nice line with a max() or something.
