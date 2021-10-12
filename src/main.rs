@@ -5,7 +5,7 @@ use crossbeam;
 
 
 // A struct with an x, y coord
-#[derive(Debug)]
+#[derive(Debug, PartialEq, PartialOrd)]
 struct Point{
     x: f64,
     y: f64,
@@ -21,8 +21,9 @@ impl Point {
 	Point { x, y }
     }
 
-    /// Euclidean distance between two points
-    fn distance(p1: &Point, p2: &Point) -> f64 {
+    /// sqaured Euclidean distance between two points
+    /// we swuare to save computation, and doesn't affect our final answer of comparing which points are closer together
+    fn squared_distance(p1: &Point, p2: &Point) -> f64 {
 	(p1.x - p2.x).powf(2.0) + (p1.y - p2.y).powf(2.0)
     }
     
@@ -31,7 +32,7 @@ impl Point {
 	let mut best_idx = 0;
 	let mut best_distance = f64::INFINITY;
 	for (i, cluster) in clusters.iter().enumerate() {
-	    let current_compare = Point::distance(&self, &cluster.centroid);
+	    let current_compare = Point::squared_distance(&self, &cluster.centroid);
 	    if current_compare < best_distance {
 		best_distance = current_compare;
 		best_idx = i;
@@ -49,8 +50,8 @@ struct Cluster<'a> {
 
 impl <'a> Cluster <'a>
 {
-    /// the new function creates an empty cluster with a random centroid
-    fn new (left: f64, right: f64, bottom: f64, top: f64) -> Self {
+    /// the new_random function creates an empty cluster with a random centroid
+    fn new_random (left: f64, right: f64, bottom: f64, top: f64) -> Self {
 	Cluster {
 	    centroid: Point::new_random_within_range(left, right, bottom, top),
 	    points: vec![],
@@ -75,7 +76,7 @@ impl <'a> Cluster <'a>
 	    sum_y += point.y;	    
 	}
 	let new_centroid = Point {x: sum_x / (self.points.len() as f64), y: sum_y / (self.points.len() as f64) };
-	let change = Point::distance(&self.centroid, &new_centroid);
+	let change = Point::squared_distance(&self.centroid, &new_centroid);
 	(*self).centroid = new_centroid;
 	change
     }
@@ -88,7 +89,7 @@ fn cluster_points<'a>(points: &'a Vec<Point>, num_clusters: usize, left: f64, ri
     // Initialize clusters with random centroids
     let mut clusters = Vec::with_capacity(num_clusters);
     for _ in 0..num_clusters {
-	let cluster = Cluster::new(left, right, bottom, top);
+	let cluster = Cluster::new_random(left, right, bottom, top);
 	clusters.push(cluster);
     }
 
@@ -214,4 +215,21 @@ fn main() {
     }
 	
 
+}
+
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    
+    #[test]
+    fn test_set_mean() {
+	let centroid = Point{ x: 3., y: 4. };
+	let points = vec![&Point{ x: 1., y: 1. }, &Point{ x: -1., y: -1. }] ;
+	let mut cluster = Cluster { centroid, points: points };
+	let diff = cluster.set_centroid();
+	assert_eq!(cluster.centroid, Point{ x: 0., y: 0. });
+	// the new centroid will be (0, 0) which is 55 away in squared euclidean distance from (3, 4)
+	assert_eq!(diff, 25.0 );
+    }
 }
