@@ -83,17 +83,23 @@ impl <'a> Cluster <'a>
 }
 
 
-fn cluster_points<'a>(points: &'a Vec<Point>, num_clusters: usize, left: f64, right: f64, bottom: f64, top: f64, num_threads: usize)
-		      -> Vec<Cluster<'a>> {
-
+fn init_random_clusters(num_clusters: usize, left: f64, right: f64, bottom: f64, top: f64) 
+			-> Vec<Cluster<'static>> {
     // Initialize clusters with random centroids
     let mut clusters = Vec::with_capacity(num_clusters);
     for _ in 0..num_clusters {
 	let cluster = Cluster::new_random(left, right, bottom, top);
 	clusters.push(cluster);
     }
+    clusters
 
-    println!("Clusters to begin: {:?}", clusters);
+}
+
+fn cluster_points<'a>(points: &'a Vec<Point>, mut clusters: Vec<Cluster<'a>>, num_threads: usize)
+		      -> Vec<Cluster<'a>> {
+
+
+
     
     const EPSILON: f64 = 0.05; // this defines the threshold for when the clusters have converged
     
@@ -207,8 +213,10 @@ fn main() {
 	points.push(point);
     }
 
+    let clusters = init_random_clusters(num_clusters, LEFT, RIGHT, BOTTOM, TOP);
+    println!("Clusters to begin: {:?}", clusters);    
     // call to function to cluster the points
-    let clusters = cluster_points(&points, num_clusters, LEFT, RIGHT, BOTTOM, TOP, num_threads);
+    let clusters = cluster_points(&points, clusters, num_threads);
 
     for (i, cluster) in clusters.iter().enumerate() {
 	println!("Cluster {} has centroid at {:?} and {} points", i, cluster.centroid, cluster.points.len());
@@ -223,7 +231,7 @@ mod tests {
     use super::*;
     
     #[test]
-    fn test_set_mean() {
+    fn set_mean() {
 	let centroid = Point{ x: 3., y: 4. };
 	let points = vec![&Point{ x: 1., y: 1. }, &Point{ x: -1., y: -1. }] ;
 	let mut cluster = Cluster { centroid, points: points };
@@ -231,5 +239,21 @@ mod tests {
 	assert_eq!(cluster.centroid, Point{ x: 0., y: 0. });
 	// the new centroid will be (0, 0) which is 55 away in squared euclidean distance from (3, 4)
 	assert_eq!(diff, 25.0 );
+    }
+
+    #[test]
+    fn cluster() {
+	let points = vec![Point{ x: 1., y: 1. }, Point{ x: -1., y: -1. }] ;
+	let centroids = vec![Point{ x: 2., y: 2. }, Point{ x: -2., y: -2. }] ;
+	let mut clusters = Vec::with_capacity(centroids.len());
+	for centroid in centroids {
+	    let cluster = Cluster { centroid, points: vec![] };
+	    clusters.push(cluster);	    
+	}
+	let num_threads = 1;
+	clusters = cluster_points(&points, clusters, num_threads);
+	println!("clusters at end = {:?}", clusters);
+	assert_eq!(*(clusters[0].points[0]), Point{ x: 1., y: 1. });
+	assert_eq!(*(clusters[1].points[0]), Point{ x: -1., y: -1. });		   
     }
 }
