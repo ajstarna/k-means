@@ -2,7 +2,7 @@
 This is my very first rust project, so I thought I would attempt k means clustering https://en.wikipedia.org/wiki/K-means_clustering
 
 Given c clusters and p points, the code intializes p random points and c random clusters and iteratively places the points into their best match cluster until convergence.
-Each cluster has a centroid (the arithmetic mean of all consituent points), and we use normal Euclidean distance for the distance between two points.
+Each cluster has a centroid (the arithmetic mean of all consituent points), and we use normal (squared) Euclidean distance for the distance between two points.
 
 This project uses the rust library clap for handling command line arguments and the the library crossbeam for helping with threads.
 
