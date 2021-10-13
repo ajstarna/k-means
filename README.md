@@ -15,4 +15,3 @@ This would require the receiver end of the channel to not wait for the threads t
 
 TODO: make it more rust idiomatic. find_best_cluster() in particular could probably be one nice line with a max() or something.
 
-TODO: add unit tests
