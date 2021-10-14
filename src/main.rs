@@ -29,6 +29,15 @@ impl Point {
     
     /// Given a list of clusters, we place ourself into the cluster with the closest centroid
     fn find_best_cluster(&self, clusters: & Vec<Cluster>) -> usize{
+
+	//let b: () = clusters.iter().enumerate()
+	//   .fold((0, f64::INFINITY), |(min_idx, min_val), (idx, &cluster)| if val < min_val {(idx, val)} else {(min_idx, min_val)})
+	//   .map(|(idx, _)| idx);
+		 
+		 
+	//let b: () = clusters.iter().enumerate()
+	//    .min_by(|(_, x), (_, y)| (Point::squared_distance(&self, &x.centroid)) < Point::squared_distance(&self, &y.centroid))
+	//    .map(|(idx, _)| idx);
 	let mut best_idx = 0;
 	let mut best_distance = f64::INFINITY;
 	for (i, cluster) in clusters.iter().enumerate() {
